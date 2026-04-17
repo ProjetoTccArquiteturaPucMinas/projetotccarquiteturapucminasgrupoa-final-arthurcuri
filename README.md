@@ -1,6 +1,7 @@
 # Sistema de Cálculo de Descontos para Marketplace
 
 ## Seu Nome: 
+Arthur Curi Kramberger
 
 ## Visão Geral do Projeto
 
