@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.example.marketplace.model.CategoriaProduto;
 import com.example.marketplace.model.ItemCarrinho;
 import com.example.marketplace.model.Produto;
 import com.example.marketplace.model.ResumoCarrinho;
@@ -18,78 +17,91 @@ public class ServicoCarrinho {
 
     private final ProdutoRepository repositorioProdutos;
 
-<span class="fc" id="L21">    public ServicoCarrinho(ProdutoRepository repositorioProdutos) {</span>
-<span class="fc" id="L22">        this.repositorioProdutos = repositorioProdutos;</span>
-<span class="fc" id="L23">    }</span>
+<span class="fc" id="L20">    public ServicoCarrinho(ProdutoRepository repositorioProdutos) {</span>
+<span class="fc" id="L21">        this.repositorioProdutos = repositorioProdutos;</span>
+<span class="fc" id="L22">    }</span>
 
     public ResumoCarrinho construirResumo(List&lt;SelecaoCarrinho&gt; selecoes) {
 
-<span class="fc" id="L27">        List&lt;ItemCarrinho&gt; itens = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L26">        List&lt;ItemCarrinho&gt; itens = new ArrayList&lt;&gt;();</span>
 
         // =========================
         // Monta os itens do carrinho
         // =========================
-<span class="fc bfc" id="L32" title="All 2 branches covered.">        for (SelecaoCarrinho selecao : selecoes) {</span>
-<span class="fc" id="L33">            Produto produto = repositorioProdutos.buscarPorId(selecao.getProdutoId())</span>
-<span class="fc" id="L34">                    .orElseThrow(</span>
-<span class="nc" id="L35">                            () -&gt; new IllegalArgumentException(&quot;Produto não encontrado: &quot; + selecao.getProdutoId()));</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        for (SelecaoCarrinho selecao : selecoes) {</span>
+<span class="fc" id="L32">            Produto produto = repositorioProdutos.buscarPorId(selecao.getProdutoId())</span>
+<span class="fc" id="L33">                    .orElseThrow(</span>
+<span class="nc" id="L34">                            () -&gt; new IllegalArgumentException(&quot;Produto não encontrado: &quot; + selecao.getProdutoId()));</span>
 
-<span class="fc" id="L37">            itens.add(new ItemCarrinho(produto, selecao.getQuantidade()));</span>
-<span class="fc" id="L38">        }</span>
+<span class="fc" id="L36">            itens.add(new ItemCarrinho(produto, selecao.getQuantidade()));</span>
+<span class="fc" id="L37">        }</span>
 
         // =========================
         // Calcula subtotal
         // =========================
-<span class="fc" id="L43">        BigDecimal subtotal = itens.stream()</span>
-<span class="fc" id="L44">                .map(ItemCarrinho::calcularSubtotal)</span>
-<span class="fc" id="L45">                .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+<span class="fc" id="L42">        BigDecimal subtotal = (BigDecimal) itens.stream()</span>
+<span class="fc" id="L43">                .map(ItemCarrinho::calcularSubtotal)</span>
+<span class="fc" id="L44">                .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
 
         // =========================
-        // Calcula desconto por quantidade
+        // Calcula percentual de desconto
         // =========================
-<span class="fc" id="L50">        int totalItens = itens.stream().mapToInt(ItemCarrinho::getQuantidade).sum();</span>
-        BigDecimal percentualQuantidade;
-<span class="fc bfc" id="L52" title="All 2 branches covered.">        if (totalItens &gt;= 4) {</span>
-<span class="fc" id="L53">            percentualQuantidade = new BigDecimal(&quot;10&quot;);</span>
-<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        } else if (totalItens == 3) {</span>
-<span class="nc" id="L55">            percentualQuantidade = new BigDecimal(&quot;7&quot;);</span>
-<span class="fc bfc" id="L56" title="All 2 branches covered.">        } else if (totalItens == 2) {</span>
-<span class="fc" id="L57">            percentualQuantidade = new BigDecimal(&quot;5&quot;);</span>
-        } else {
-<span class="fc" id="L59">            percentualQuantidade = BigDecimal.ZERO;</span>
-        }
+<span class="fc" id="L49">        BigDecimal percentualDesconto = calcularPercentualDesconto(selecoes);</span>
 
         // =========================
-        // Calcula desconto por categoria (acumulado por item)
+        // Calcula valor do desconto
         // =========================
-<span class="fc" id="L65">        BigDecimal percentualCategoria = itens.stream()</span>
-<span class="fc" id="L66">                .map(item -&gt; descontoPorCategoria(item.getProduto().getCategoria()))</span>
-<span class="fc" id="L67">                .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+<span class="fc" id="L54">        BigDecimal valorDesconto = subtotal.multiply(percentualDesconto).divide(BigDecimal.valueOf(100));</span>
+        // =========================
+        // Calcula total
+        // =========================
+<span class="fc" id="L58">        BigDecimal total = subtotal.subtract(valorDesconto);</span>
 
-        // =========================
-        // Aplica limite máximo de 25%
-        // =========================
-<span class="fc" id="L72">        BigDecimal percentualDesconto = percentualQuantidade.add(percentualCategoria)</span>
-<span class="fc" id="L73">                .min(new BigDecimal(&quot;25&quot;));</span>
-
-        // =========================
-        // Calcula valor do desconto e total
-        // =========================
-<span class="fc" id="L78">        BigDecimal valorDesconto = subtotal.multiply(percentualDesconto)</span>
-<span class="fc" id="L79">                .divide(new BigDecimal(&quot;100&quot;));</span>
-<span class="fc" id="L80">        BigDecimal total = subtotal.subtract(valorDesconto);</span>
-
-<span class="fc" id="L82">        return new ResumoCarrinho(itens, subtotal, percentualDesconto, valorDesconto, total);</span>
+<span class="fc" id="L60">        return new ResumoCarrinho(itens, subtotal, percentualDesconto, valorDesconto, total);</span>
     }
 
-    private BigDecimal descontoPorCategoria(CategoriaProduto categoria) {
-<span class="fc bfc" id="L86" title="All 5 branches covered.">        return switch (categoria) {</span>
-<span class="fc" id="L87">            case CAPINHA -&gt; new BigDecimal(&quot;3&quot;);</span>
-<span class="fc" id="L88">            case CARREGADOR -&gt; new BigDecimal(&quot;5&quot;);</span>
-<span class="fc" id="L89">            case FONE -&gt; new BigDecimal(&quot;3&quot;);</span>
-<span class="fc" id="L90">            case PELICULA -&gt; new BigDecimal(&quot;2&quot;);</span>
-<span class="fc" id="L91">            case SUPORTE -&gt; new BigDecimal(&quot;2&quot;);</span>
-        };
+    
+    public BigDecimal calcularPercentualDesconto(List&lt;SelecaoCarrinho&gt; selecoes) { 
+<span class="fc" id="L65">        int quantidadeTotal = selecoes.stream()</span>
+<span class="fc" id="L66">                .mapToInt(SelecaoCarrinho::getQuantidade)</span>
+<span class="fc" id="L67">                .sum();</span>
+
+<span class="fc" id="L69">        BigDecimal percentualDesconto = BigDecimal.ZERO;</span>
+
+        // Desconto por quantidade total de itens
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        if (quantidadeTotal == 2) {</span>
+<span class="fc" id="L73">            percentualDesconto = percentualDesconto.add(BigDecimal.valueOf(5));</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        } else if (quantidadeTotal == 3) {</span>
+<span class="nc" id="L75">            percentualDesconto = percentualDesconto.add(BigDecimal.valueOf(7));</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">        } else if (quantidadeTotal &gt;= 4) {</span>
+<span class="fc" id="L77">            percentualDesconto = percentualDesconto.add(BigDecimal.valueOf(10));</span>
+        }
+
+        // Desconto adicional por categoria
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        for (SelecaoCarrinho selecao : selecoes) {</span>
+<span class="fc" id="L82">            Produto produto = repositorioProdutos.buscarPorId(selecao.getProdutoId())</span>
+<span class="fc" id="L83">                    .orElseThrow(</span>
+<span class="nc" id="L84">                            () -&gt; new IllegalArgumentException(&quot;Produto não encontrado: &quot; + selecao.getProdutoId()));</span>
+
+<span class="pc bpc" id="L86" title="1 of 6 branches missed.">            switch (produto.getCategoria()) {</span>
+                case CAPINHA:
+<span class="fc" id="L88">                    percentualDesconto = percentualDesconto.add(BigDecimal.valueOf(3));</span>
+<span class="fc" id="L89">                    break;</span>
+                case CARREGADOR:
+<span class="fc" id="L91">                    percentualDesconto = percentualDesconto.add(BigDecimal.valueOf(5));</span>
+<span class="fc" id="L92">                    break;</span>
+                case FONE:
+<span class="fc" id="L94">                    percentualDesconto = percentualDesconto.add(BigDecimal.valueOf(3));</span>
+<span class="fc" id="L95">                    break;</span>
+                case PELICULA:
+<span class="fc" id="L97">                    percentualDesconto = percentualDesconto.add(BigDecimal.valueOf(2));</span>
+<span class="fc" id="L98">                    break;</span>
+                case SUPORTE:
+<span class="fc" id="L100">                    percentualDesconto = percentualDesconto.add(BigDecimal.valueOf(2));</span>
+                    break;
+            }
+<span class="fc" id="L103">        }</span>
+<span class="fc" id="L104">        return percentualDesconto;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

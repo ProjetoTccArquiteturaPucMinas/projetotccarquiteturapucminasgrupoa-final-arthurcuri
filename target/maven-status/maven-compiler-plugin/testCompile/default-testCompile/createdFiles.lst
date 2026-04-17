@@ -1,7 +1,7 @@
-com\example\marketplace\service\ServicoProdutoTest.class
-com\example\marketplace\service\ServicoCarrinhoTest.class
-com\example\marketplace\controller\HomeControllerTest.class
-com\example\marketplace\AplicacaoMercadoTest.class
-com\example\marketplace\architecture\ArquiteturaTest.class
-com\example\marketplace\model\SelecaoCarrinhoTest.class
-com\example\marketplace\controller\CarrinhoControllerTest.class
+com/example/marketplace/controller/CarrinhoControllerTest.class
+com/example/marketplace/AplicacaoMercadoTest.class
+com/example/marketplace/service/ServicoCarrinhoTest.class
+com/example/marketplace/service/ServicoProdutoTest.class
+com/example/marketplace/architecture/ArquiteturaTest.class
+com/example/marketplace/controller/HomeControllerTest.class
+com/example/marketplace/model/SelecaoCarrinhoTest.class

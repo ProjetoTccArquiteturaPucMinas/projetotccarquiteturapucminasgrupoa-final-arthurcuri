@@ -4,12 +4,12 @@
 Este projeto faz parte de um experimento acadêmico para avaliar esforço de compreensão e esforço de modificação em diferentes arquiteturas de software.
 
 ## Sua tarefa
-1. Identificar a arquitetura usada no projeto.
-2. Justificar com base na estrutura do código.
-3. Identificar a classe que deve ser alterada
-4. Implementar a feature de cálculo de descontos no carrinho.
-5. Realizar testes de ponta a ponta para validar a implementação.
-6. Executar os testes até que todos passem.
+1. Identificar a arquitetura usada no projeto: MVC
+2. Justificar com base na estrutura do código: Model, Controller, Repository e Service
+3. Identificar a classe que deve ser alterada: ServicoCarrinho.java
+4. Implementar a feature de cálculo de descontos no carrinho: Done
+5. Realizar testes de ponta a ponta para validar a implementação: Done
+6. Executar os testes até que todos passem: Done
 
 ## Regras que precisam ser implementadas
 
@@ -30,7 +30,8 @@ Este projeto faz parte de um experimento acadêmico para avaliar esforço de com
 
 ### 3. Regra de desconto máximo
 - A soma dos descontos é cumulativa
-- O percentual total não pode ultrapassar 25%
+- O percentual total não pode ultrapassar 25%mvn spring-boot:run
+
 
 ### 4. Total final
 - valorDesconto = subtotal * percentualDesconto / 100
