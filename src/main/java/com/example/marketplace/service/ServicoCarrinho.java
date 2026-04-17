@@ -52,14 +52,12 @@ public class ServicoCarrinho {
         BigDecimal total = subtotal.subtract(valorDesconto);
         return new ResumoCarrinho(itens, subtotal, percentualDesconto, valorDesconto, total);
     }
-
-    public BigDecimal calcularPercentualDesconto(List<SelecaoCarrinho> selecoes) { 
-        int quantidadeTotal = selecoes.stream()
-                .mapToInt(SelecaoCarrinho::getQuantidade)
-                .sum();
-
+    private BigDecimal calcularPercentualDesconto(List<SelecaoCarrinho> selecoes) {
+        int quantidadeTotal = selecoes.stream().mapToInt(SelecaoCarrinho::getQuantidade).sum();
         BigDecimal percentualDesconto = BigDecimal.ZERO;
+        // =========================
         // Desconto por quantidade total de itens
+        // =========================
         if (quantidadeTotal == 2) {
             percentualDesconto = percentualDesconto.add(BigDecimal.valueOf(5));
         } else if (quantidadeTotal == 3) {
@@ -67,12 +65,13 @@ public class ServicoCarrinho {
         } else if (quantidadeTotal >= 4) {
             percentualDesconto = percentualDesconto.add(BigDecimal.valueOf(10));
         }
-        // Desconto adicional por categoria        
+        // =========================
+        // Desconto adicional por categoria
+        // =========================
         for (SelecaoCarrinho selecao : selecoes) {
             Produto produto = repositorioProdutos.buscarPorId(selecao.getProdutoId())
                     .orElseThrow(
                             () -> new IllegalArgumentException("Produto não encontrado: " + selecao.getProdutoId()));
-
             switch (produto.getCategoria()) {
                 case CAPINHA:
                     percentualDesconto = percentualDesconto.add(BigDecimal.valueOf(3));
@@ -89,8 +88,11 @@ public class ServicoCarrinho {
                 case SUPORTE:
                     percentualDesconto = percentualDesconto.add(BigDecimal.valueOf(2));
                     break;
+                default:
+                    break;
             }
         }
         return percentualDesconto;
     }
+    
 }
