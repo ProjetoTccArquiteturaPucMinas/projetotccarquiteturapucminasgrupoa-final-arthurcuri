@@ -21,5 +21,14 @@ jobs:
           java-version: '17'
           cache: 'maven'
 
-      - name: Build e Testes com Maven
-        run: mvn clean verify
+      # 🔹 Etapa 1: Build + testes (clean install)
+      - name: Build + Testes Unitários (clean install)
+        run: mvn clean install
+
+      # 🔹 Etapa 2: Apenas testes unitários
+      - name: Executar Testes Unitários
+        run: mvn test
+
+      # 🔹 Etapa 3: Testes de Arquitetura
+      - name: Executar Testes de Arquitetura
+        run: mvn test -Dtest=ArquiteturaTest
